@@ -1,3 +1,4 @@
+import fs from 'fs';
 import readline from 'readline';
 
 const rl = readline.createInterface({
@@ -20,10 +21,11 @@ const askQuestion = (query) => {
   });
 };
 
-async function main() {
-  const a = await askQuestion('a = ');
-  const b = await askQuestion('b = ');
-  const c = await askQuestion('c = ');
+const solveEquation = (a, b, c) => {
+  if (a === 0) {
+    console.log('Error. a cannot be 0');
+    process.exit(1);
+  }
 
   const discriminant = b ** 2 - 4 * a * c;
   const roots = [];
@@ -48,8 +50,41 @@ async function main() {
   roots.forEach((root, index) => {
     console.log(`x${index + 1} = ${root.toFixed(2)}`);
   });
+};
 
-  rl.close();
-}
+const main = async () => {
+  if (process.argv.length === 3) {
+    // File mode
+    const filePath = process.argv[2];
+    if (!fs.existsSync(filePath)) {
+      console.log(`file ${filePath} does not exist`);
+      process.exit(1);
+    }
+
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8').trim();
+      const numbers = content.split(' ').map(Number);
+
+      if (numbers.length !== 3 || numbers.some(isNaN)) {
+        console.log('invalid file format');
+        process.exit(1);
+      }
+
+      const [a, b, c] = numbers;
+      solveEquation(a, b, c);
+    } catch (error) {
+      console.log('invalid file format');
+      process.exit(1);
+    }
+    rl.close();
+  } else {
+    // Interactive mode
+    const a = await askQuestion('a = ');
+    const b = await askQuestion('b = ');
+    const c = await askQuestion('c = ');
+    rl.close();
+    solveEquation(a, b, c);
+  }
+};
 
 main();
