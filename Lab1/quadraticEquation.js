@@ -7,14 +7,23 @@ const rl = readline.createInterface({
 
 const askQuestion = (query) => {
   return new Promise((resolve) => {
-    rl.question(query, (answer) => resolve(parseFloat(answer)));
+    rl.question(query, (answer) => {
+      if (!/^-?\d*\.?\d+$/.test(answer)) {
+        console.log(
+          `Error. Expected a valid real number, got ${answer} instead`
+        );
+        resolve(askQuestion(query));
+      } else {
+        resolve(parseFloat(answer));
+      }
+    });
   });
 };
 
 async function main() {
-  const a = await askQuestion('Введіть a: ');
-  const b = await askQuestion('Введіть b: ');
-  const c = await askQuestion('Введіть c: ');
+  const a = await askQuestion('a = ');
+  const b = await askQuestion('b = ');
+  const c = await askQuestion('c = ');
 
   const discriminant = b ** 2 - 4 * a * c;
   const roots = [];
